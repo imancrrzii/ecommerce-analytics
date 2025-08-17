@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 import math
+from collections import defaultdict
 from datetime import datetime, timedelta
 
 
@@ -102,13 +103,61 @@ class AnalyticsController:
             }
         })
 
+    def get_revenue_trend(self):
+        period = request.args.get('period', 'monthly')
+        
+        trend_data = defaultdict(lambda: {
+            'revenue': 0, 'orders': 0, 'profit': 0, 'returns': 0,
+            'new_customers': 0, 'returning_customers': 0
+        })
+        
+        for transaction in self.transactions:
+            if period == 'monthly':
+                key = transaction['tanggal'][:7]
+            elif period == 'weekly':
+                date_obj = datetime.strptime(transaction['tanggal'], '%Y-%m-%d')
+                week = date_obj.isocalendar()[1]
+                key = f"{date_obj.year}-W{week:02d}"
+            else:
+                key = transaction['tanggal']
+            
+            net_revenue = transaction['total_penjualan'] - transaction['discount']
+            profit = net_revenue - transaction['shipping_cost'] - (transaction['harga_satuan'] * transaction['quantity'] * 0.6)
+            
+            trend_data[key]['revenue'] += net_revenue
+            trend_data[key]['orders'] += 1
+            trend_data[key]['profit'] += profit
+            if transaction['is_returned']:
+                trend_data[key]['returns'] += net_revenue
+            
+            if transaction['customer_segment'] == 'New Customer':
+                trend_data[key]['new_customers'] += 1
+            else:
+                trend_data[key]['returning_customers'] += 1
+        
+        result = []
+        for period_key in sorted(trend_data.keys()):
+            data_point = trend_data[period_key]
+            result.append({
+                'period': period_key,
+                'revenue': data_point['revenue'],
+                'orders': data_point['orders'],
+                'profit': data_point['profit'],
+                'returns': data_point['returns'],
+                'new_customers': data_point['new_customers'],
+                'returning_customers': data_point['returning_customers'],
+                'avg_order_value': data_point['revenue'] / data_point['orders'] if data_point['orders'] > 0 else 0
+            })
+        
+        return jsonify({'success': True, 'data': result})
+
 
 def create_controllers_and_routes(transactions_data):
     analytics_controller = AnalyticsController(transactions_data)
 
-    transactions_bp.add_url_rule(
-        '/', view_func=analytics_controller.get_transactions)
-    analytics_bp.add_url_rule(
-        '/overview', view_func=analytics_controller.get_analytics_overview)
+    transactions_bp.add_url_rule('/', view_func=analytics_controller.get_transactions)
+    analytics_bp.add_url_rule('/overview', view_func=analytics_controller.get_analytics_overview)
+    analytics_bp.add_url_rule('/revenue-trend', view_func=analytics_controller.get_revenue_trend)
+
 
     return transactions_bp, analytics_bp
