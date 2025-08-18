@@ -279,7 +279,50 @@ class AnalyticsController:
 
         return jsonify({'success': True, 'data': {'segments': segments, 'age_groups': age_analysis, 'acquisition_channels': channels}})
 
-    
+    def get_regional_performance(self):
+        data = self.transactions
+        regional_data = defaultdict(lambda: {
+            'revenue': 0, 'orders': 0, 'customers': set(),
+            'avg_shipping': [], 'return_rate': 0, 'returns': 0,
+            'payment_methods': defaultdict(int)
+        })
+
+        for transaction in data:
+            region = transaction['region']
+            customer_id = transaction['id'] % 1000
+            revenue = transaction['total_penjualan'] - transaction['discount']
+            
+            regional_data[region]['revenue'] += revenue
+            regional_data[region]['orders'] += 1
+            regional_data[region]['customers'].add(customer_id)
+            regional_data[region]['avg_shipping'].append(transaction['shipping_cost'])
+            regional_data[region]['payment_methods'][transaction['payment_method']] += 1
+            
+            if transaction['is_returned']:
+                regional_data[region]['returns'] += 1
+        
+        result = []
+        for region, metrics in regional_data.items():
+            avg_shipping = sum(metrics['avg_shipping']) / len(metrics['avg_shipping']) if metrics['avg_shipping'] else 0
+            return_rate = (metrics['returns'] / metrics['orders']) * 100 if metrics['orders'] > 0 else 0
+            popular_payment = max(metrics['payment_methods'].items(), key=lambda x: x[1])[0] if metrics['payment_methods'] else 'N/A'
+            
+            result.append({
+                'region': region,
+                'revenue': metrics['revenue'],
+                'orders': metrics['orders'],
+                'customers': len(metrics['customers']),
+                'avg_order_value': metrics['revenue'] / metrics['orders'] if metrics['orders'] > 0 else 0,
+                'avg_shipping_cost': round(avg_shipping, 2),
+                'return_rate': round(return_rate, 2),
+                'popular_payment_method': popular_payment,
+                'revenue_per_customer': metrics['revenue'] / len(metrics['customers']) if metrics['customers'] else 0
+            })
+        
+        result.sort(key=lambda x: x['revenue'], reverse=True)
+        return jsonify({'success': True, 'data': result})
+
+
 def create_controllers_and_routes(transactions_data):
     analytics_controller = AnalyticsController(transactions_data)
 
@@ -288,6 +331,7 @@ def create_controllers_and_routes(transactions_data):
     analytics_bp.add_url_rule('/revenue-trend', view_func=analytics_controller.get_revenue_trend)
     analytics_bp.add_url_rule('/category-performance', view_func=analytics_controller.get_category_performance)
     analytics_bp.add_url_rule('/customer-insights', view_func=analytics_controller.get_customer_insights)
+    analytics_bp.add_url_rule('/regional-performance', view_func=analytics_controller.get_regional_performance)
 
 
     return transactions_bp, analytics_bp
