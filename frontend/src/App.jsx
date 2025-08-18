@@ -1,9 +1,9 @@
-import React from 'react'
+import Dashboard from './dashboard/Dashboard'
 
 const App = () => {
   return (
-    <div>
-      <h1 className='text-3xl font-bold underline text-red-500 text-center'>Hello</h1>
+    <div className="min-h-screen bg-gray-100">
+      <Dashboard />
     </div>
   )
 }
