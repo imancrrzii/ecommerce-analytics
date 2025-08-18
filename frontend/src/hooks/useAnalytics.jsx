@@ -5,12 +5,14 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const endpoints = {
   overview: `${API_BASE}/analytics/overview`,
   revenue: `${API_BASE}/analytics/revenue-trend`,
+  categories: `${API_BASE}/analytics/category-performance`,
 };
 
 export const useAnalytics = (activeTab, timeRange) => {
   const [data, setData] = useState({
     overview: null,
     revenueTrend: [],
+    categoryPerformance: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,6 +30,10 @@ export const useAnalytics = (activeTab, timeRange) => {
       case "revenue":
         endpointUrl = `${endpoints.revenue}?period=${timeRange}`;
         dataKey = "revenueTrend";
+        break;
+      case "categories":
+        endpointUrl = endpoints.categories;
+        dataKey = "categoryPerformance";
         break;
       default:
         return;

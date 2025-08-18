@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarChart3, DollarSign } from "lucide-react";
+import { BarChart3, CassetteTape, DollarSign } from "lucide-react";
 import { useAnalytics } from "../hooks/useAnalytics";
 import OverviewTab from "../components/OverviewTab";
 import RevenueAnalysisTab from "../components/RevenueAnalysisTab";
@@ -7,6 +7,7 @@ import TabNavigation from "../components/TabNavigation";
 import DashboardHeader from "../components/DashboardHeader";
 import Loader from "../components/Loader";
 import ErrorState from "../components/ErrorState";
+import CategoryPerformanceTab from "../components/CategoryPerformanceTab";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const tabs = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "revenue", label: "Revenue Analysis", icon: DollarSign },
+    { id: "categories", label: "Category Performance", icon: CassetteTape },
   ];
 
   const renderTabContent = () => {
@@ -41,6 +43,12 @@ const Dashboard = () => {
         );
       case "revenue":
         return <RevenueAnalysisTab revenueTrend={data.revenueTrend} />;
+      case "categories":
+        return (
+          <CategoryPerformanceTab
+            categoryPerformance={data.categoryPerformance}
+          />
+        );
       default:
         return null;
     }
