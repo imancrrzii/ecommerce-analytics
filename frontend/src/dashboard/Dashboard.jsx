@@ -1,20 +1,25 @@
-import  { useState } from 'react';
-import { BarChart3 } from 'lucide-react';
-import { useAnalytics } from '../hooks/useAnalytics';
-import OverviewTab from '../components/OverviewTab';
-import TabNavigation from '../components/TabNavigation';
-import DashboardHeader from '../components/DashboardHeader';
-import Loader from '../components/Loader';
-import ErrorState from '../components/ErrorState';
+import { useState } from "react";
+import { BarChart3, DollarSign } from "lucide-react";
+import { useAnalytics } from "../hooks/useAnalytics";
+import OverviewTab from "../components/OverviewTab";
+import RevenueAnalysisTab from "../components/RevenueAnalysisTab";
+import TabNavigation from "../components/TabNavigation";
+import DashboardHeader from "../components/DashboardHeader";
+import Loader from "../components/Loader";
+import ErrorState from "../components/ErrorState";
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [timeRange, setTimeRange] = useState('monthly');
-  
-  const { data, loading, error, refreshData } = useAnalytics(activeTab, timeRange);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [timeRange, setTimeRange] = useState("monthly");
+
+  const { data, loading, error, refreshData } = useAnalytics(
+    activeTab,
+    timeRange
+  );
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 }
+    { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "revenue", label: "Revenue Analysis", icon: DollarSign },
   ];
 
   const renderTabContent = () => {
@@ -23,12 +28,19 @@ const Dashboard = () => {
     }
 
     if (error) {
-        return <ErrorState message={error} onRetry={refreshData} />;
+      return <ErrorState message={error} onRetry={refreshData} />;
     }
 
     switch (activeTab) {
-      case 'overview':
-        return <OverviewTab overviewData={data.overview} revenueTrend={data.revenueTrend} />;
+      case "overview":
+        return (
+          <OverviewTab
+            overviewData={data.overview}
+            revenueTrend={data.revenueTrend}
+          />
+        );
+      case "revenue":
+        return <RevenueAnalysisTab revenueTrend={data.revenueTrend} />;
       default:
         return null;
     }
@@ -41,10 +53,12 @@ const Dashboard = () => {
         setTimeRange={setTimeRange}
         onRefresh={refreshData}
       />
-      <TabNavigation tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {renderTabContent()}
-      </div>
+      <TabNavigation
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+      <div className="max-w-7xl mx-auto px-6 py-8">{renderTabContent()}</div>
     </div>
   );
 };

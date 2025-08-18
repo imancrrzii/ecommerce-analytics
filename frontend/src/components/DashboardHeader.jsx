@@ -4,7 +4,7 @@ const DashboardHeader = ({ timeRange, setTimeRange, onRefresh }) => {
   return (
     <div className="bg-white shadow-lg">
       <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-2">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">E-Commerce Analytics</h1>
             <p className="text-gray-600 mt-1">Advanced business intelligence dashboard</p>

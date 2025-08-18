@@ -3,12 +3,14 @@ import { useState, useEffect, useCallback } from "react";
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const endpoints = {
-  overview: `${API_BASE}/analytics/overview`
+  overview: `${API_BASE}/analytics/overview`,
+  revenue: `${API_BASE}/analytics/revenue-trend`,
 };
 
-export const useAnalytics = (activeTab) => {
+export const useAnalytics = (activeTab, timeRange) => {
   const [data, setData] = useState({
     overview: null,
+    revenueTrend: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,6 +24,10 @@ export const useAnalytics = (activeTab) => {
       case "overview":
         endpointUrl = endpoints.overview;
         dataKey = "overview";
+        break;
+      case "revenue":
+        endpointUrl = `${endpoints.revenue}?period=${timeRange}`;
+        dataKey = "revenueTrend";
         break;
       default:
         return;
@@ -47,7 +53,7 @@ export const useAnalytics = (activeTab) => {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, refreshCounter]); 
+  }, [activeTab, timeRange, refreshCounter]);
 
   useEffect(() => {
     fetchDataForTab();
