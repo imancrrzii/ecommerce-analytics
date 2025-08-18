@@ -150,6 +150,64 @@ class AnalyticsController:
             })
         
         return jsonify({'success': True, 'data': result})
+    
+    def get_category_performance(self):
+        today = datetime.now()
+        current_month = today.strftime('%Y-%m')
+        previous_month = (today.replace(day=1) - timedelta(days=1)).strftime('%Y-%m')
+        
+        category_data = defaultdict(lambda: {
+            'current': {'revenue': 0, 'orders': 0, 'profit': 0},
+            'previous': {'revenue': 0, 'orders': 0, 'profit': 0},
+            'total': {'revenue': 0, 'orders': 0, 'profit': 0},
+            'avg_rating': []
+        })
+        
+        for transaction in self.transactions:
+            category = transaction['kategori']
+            month = transaction['tanggal'][:7]
+            revenue = transaction['total_penjualan'] - transaction['discount']
+            profit = revenue - transaction['shipping_cost'] - (transaction['harga_satuan'] * transaction['quantity'] * 0.6)
+            
+            category_data[category]['total']['revenue'] += revenue
+            category_data[category]['total']['orders'] += 1
+            category_data[category]['total']['profit'] += profit
+            category_data[category]['avg_rating'].append(transaction['rating'])
+            
+            if month == current_month:
+                category_data[category]['current']['revenue'] += revenue
+                category_data[category]['current']['orders'] += 1
+                category_data[category]['current']['profit'] += profit
+            elif month == previous_month:
+                category_data[category]['previous']['revenue'] += revenue
+                category_data[category]['previous']['orders'] += 1
+                category_data[category]['previous']['profit'] += profit
+        
+        result = []
+        for category, metrics in category_data.items():
+            current_rev = metrics['current']['revenue']
+            previous_rev = metrics['previous']['revenue']
+            
+            revenue_growth = 0
+            if previous_rev > 0:
+                revenue_growth = ((current_rev - previous_rev) / previous_rev) * 100
+            
+            avg_rating = sum(metrics['avg_rating']) / len(metrics['avg_rating']) if metrics['avg_rating'] else 0
+            
+            result.append({
+                'category': category,
+                'total_revenue': metrics['total']['revenue'],
+                'total_orders': metrics['total']['orders'],
+                'total_profit': metrics['total']['profit'],
+                'current_month_revenue': current_rev,
+                'previous_month_revenue': previous_rev,
+                'revenue_growth': round(revenue_growth, 2),
+                'avg_rating': round(avg_rating, 2),
+                'profit_margin': round((metrics['total']['profit'] / metrics['total']['revenue']) * 100, 2) if metrics['total']['revenue'] > 0 else 0
+            })
+        
+        result.sort(key=lambda x: x['total_revenue'], reverse=True)
+        return jsonify({'success': True, 'data': result})
 
 
 def create_controllers_and_routes(transactions_data):
@@ -158,6 +216,7 @@ def create_controllers_and_routes(transactions_data):
     transactions_bp.add_url_rule('/', view_func=analytics_controller.get_transactions)
     analytics_bp.add_url_rule('/overview', view_func=analytics_controller.get_analytics_overview)
     analytics_bp.add_url_rule('/revenue-trend', view_func=analytics_controller.get_revenue_trend)
+    analytics_bp.add_url_rule('/category-performance', view_func=analytics_controller.get_category_performance)
 
 
     return transactions_bp, analytics_bp
