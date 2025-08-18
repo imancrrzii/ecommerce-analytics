@@ -7,6 +7,7 @@ const endpoints = {
   revenue: `${API_BASE}/analytics/revenue-trend`,
   categories: `${API_BASE}/analytics/category-performance`,
   customers: `${API_BASE}/analytics/customer-insights`,
+  regions: `${API_BASE}/analytics/regional-performance`,
 };
 
 export const useAnalytics = (activeTab, timeRange) => {
@@ -40,6 +41,10 @@ export const useAnalytics = (activeTab, timeRange) => {
       case "customers":
         endpointUrl = endpoints.customers;
         dataKey = "customerInsights";
+        break;
+      case "regions":
+        endpointUrl = endpoints.regions;
+        dataKey = "regionalData";
         break;
       default:
         return;

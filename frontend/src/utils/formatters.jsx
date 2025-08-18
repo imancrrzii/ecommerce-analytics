@@ -29,3 +29,24 @@ export const getGrowthIcon = (value) => {
   if (value === null || value === undefined) return null;
   return value >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />;
 };
+
+export const formatLargeNumber = (value) => {
+  if (!value || value === 0) return "0";
+  
+  if (value >= 1_000_000_000)
+    return (value / 1_000_000_000) % 1 === 0
+      ? value / 1_000_000_000 + " M"
+      : (value / 1_000_000_000).toFixed(1) + " M";
+      
+  if (value >= 1_000_000)
+    return (value / 1_000_000) % 1 === 0
+      ? value / 1_000_000 + " Juta"
+      : (value / 1_000_000).toFixed(1) + " Juta";
+      
+  if (value >= 1_000)
+    return (value / 1_000) % 1 === 0
+      ? value / 1_000 + " Ribu"
+      : (value / 1_000).toFixed(1) + " Ribu";
+      
+  return value.toString();
+};

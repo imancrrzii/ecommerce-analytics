@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { BarChart3, CassetteTape, DollarSign, Users } from "lucide-react";
+import {
+  BarChart3,
+  CassetteTape,
+  DollarSign,
+  Users,
+  MapPin,
+} from "lucide-react";
 import { useAnalytics } from "../hooks/useAnalytics";
 import OverviewTab from "../components/OverviewTab";
 import RevenueAnalysisTab from "../components/RevenueAnalysisTab";
@@ -9,6 +15,7 @@ import Loader from "../components/Loader";
 import ErrorState from "../components/ErrorState";
 import CategoryPerformanceTab from "../components/CategoryPerformanceTab";
 import CustomerInsightsTab from "../components/CustomerInsightsTab";
+import RegionalAnalysisTab from "../components/RegionalAnalysisTab";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -24,6 +31,7 @@ const Dashboard = () => {
     { id: "revenue", label: "Revenue Analysis", icon: DollarSign },
     { id: "categories", label: "Category Performance", icon: CassetteTape },
     { id: "customers", label: "Customer Insights", icon: Users },
+    { id: "regions", label: "Regional Analysis", icon: MapPin },
   ];
 
   const renderTabContent = () => {
@@ -53,6 +61,8 @@ const Dashboard = () => {
         );
       case "customers":
         return <CustomerInsightsTab customerInsights={data.customerInsights} />;
+      case "regions":
+        return <RegionalAnalysisTab regionalData={data.regionalData} />;
       default:
         return null;
     }
@@ -70,7 +80,9 @@ const Dashboard = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
-      <div className="max-w-screen mx-auto px-4 md:px-12 py-8">{renderTabContent()}</div>
+      <div className="max-w-screen mx-auto px-4 md:px-12 py-8">
+        {renderTabContent()}
+      </div>
     </div>
   );
 };

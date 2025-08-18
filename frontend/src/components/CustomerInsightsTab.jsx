@@ -14,22 +14,7 @@ import {
 } from "recharts";
 import Card from "../components/Card";
 import ChartCard from "../components/ChartCard";
-
-const formatLargeNumber = (value) => {
-  if (value >= 1_000_000_000)
-    return (value / 1_000_000_000) % 1 === 0
-      ? value / 1_000_000_000 + " M"
-      : (value / 1_000_000_000).toFixed(1) + " M";
-  if (value >= 1_000_000)
-    return (value / 1_000_000) % 1 === 0
-      ? value / 1_000_000 + " Juta"
-      : (value / 1_000_000).toFixed(1) + " Juta";
-  if (value >= 1_000)
-    return (value / 1_000) % 1 === 0
-      ? value / 1_000 + " Ribu"
-      : (value / 1_000).toFixed(1) + " Ribu";
-  return value;
-};
+import { formatLargeNumber } from '../utils/formatters';
 
 const COLORS = [
   "#0088FE",

@@ -16,9 +16,9 @@ class ECommerceDataGenerator:
             'Medan': 0.08,
             'Makassar': 0.05,
             'Semarang': 0.05,
-            'Palembang': 0.05,
-            'Batam': 0.04,
-            'Yogyakarta': 0.04,
+            'Palembang': 0.07,
+            'Batam': 0.03,
+            'Yogyakarta': 0.03,
             'Denpasar': 0.04,
         }
         
@@ -85,10 +85,6 @@ class ECommerceDataGenerator:
         }
         
     def generate_transactions(self, days=365, count=5000):
-        """
-        Menghasilkan daftar transaksi berdasarkan parameter yang diberikan,
-        dengan bobot region dan variasi kuantitas.
-        """
         transactions = []
         base_date = datetime.now() - timedelta(days=days)
         
