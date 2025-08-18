@@ -3,7 +3,7 @@ import { RefreshCw } from 'lucide-react';
 const DashboardHeader = ({ timeRange, setTimeRange, onRefresh }) => {
   return (
     <div className="bg-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-screen mx-auto px-4 md:px-12 py-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-2">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">E-Commerce Analytics</h1>

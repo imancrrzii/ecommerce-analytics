@@ -1,8 +1,8 @@
 const TabNavigation = ({ tabs, activeTab, setActiveTab }) => {
   return (
     <div className="bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-2">
-        <nav className="flex space-x-8 border-1 border-gray-200 rounded-md shadow-xs">
+      <div className="max-w-screen mx-auto px-4 md:px-12 py-2">
+        <nav className="flex gap-6 border-1 border-gray-200 rounded-md shadow-xs">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (

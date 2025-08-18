@@ -6,6 +6,7 @@ const endpoints = {
   overview: `${API_BASE}/analytics/overview`,
   revenue: `${API_BASE}/analytics/revenue-trend`,
   categories: `${API_BASE}/analytics/category-performance`,
+  customers: `${API_BASE}/analytics/customer-insights`,
 };
 
 export const useAnalytics = (activeTab, timeRange) => {
@@ -13,6 +14,7 @@ export const useAnalytics = (activeTab, timeRange) => {
     overview: null,
     revenueTrend: [],
     categoryPerformance: [],
+    customerInsights: null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -34,6 +36,10 @@ export const useAnalytics = (activeTab, timeRange) => {
       case "categories":
         endpointUrl = endpoints.categories;
         dataKey = "categoryPerformance";
+        break;
+      case "customers":
+        endpointUrl = endpoints.customers;
+        dataKey = "customerInsights";
         break;
       default:
         return;

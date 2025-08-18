@@ -208,8 +208,78 @@ class AnalyticsController:
         
         result.sort(key=lambda x: x['total_revenue'], reverse=True)
         return jsonify({'success': True, 'data': result})
+        
+    def get_customer_insights(self):
+        data = self.transactions
+        segment_data = defaultdict(lambda: {
+            'revenue': 0, 'orders': 0, 'customers': set(), 'avg_age': [], 'satisfaction': []
+        })
+        age_groups = defaultdict(lambda: {'revenue': 0, 'orders': 0})
+        channel_data = defaultdict(lambda: {'revenue': 0, 'orders': 0, 'customers': set()})
 
+        for transaction in data:
+            segment = transaction['customer_segment']
+            age = transaction['customer_age']
+            channel = transaction['acquisition_channel']
+            customer_id = transaction['id'] % 1000
+            revenue = transaction['total_penjualan'] - transaction['discount']
 
+            segment_data[segment]['revenue'] += revenue
+            segment_data[segment]['orders'] += 1
+            segment_data[segment]['customers'].add(customer_id)
+            segment_data[segment]['avg_age'].append(age)
+            segment_data[segment]['satisfaction'].append(transaction['rating'])
+            
+            if age < 25:
+                age_group = '18-24'
+            elif age < 35:
+                age_group = '25-34'
+            elif age < 45:
+                age_group = '35-44'
+            elif age < 55:
+                age_group = '45-54'
+            else:
+                age_group = '55+'
+            
+            age_groups[age_group]['revenue'] += revenue
+            age_groups[age_group]['orders'] += 1
+            
+            channel_data[channel]['revenue'] += revenue
+            channel_data[channel]['orders'] += 1
+            channel_data[channel]['customers'].add(customer_id)
+
+        segments = []
+        for segment, metrics in segment_data.items():
+            avg_age = sum(metrics['avg_age']) / len(metrics['avg_age']) if metrics['avg_age'] else 0
+            avg_satisfaction = sum(metrics['satisfaction']) / len(metrics['satisfaction']) if metrics['satisfaction'] else 0
+            
+            segments.append({
+                'segment': segment,
+                'revenue': metrics['revenue'],
+                'orders': metrics['orders'],
+                'customers': len(metrics['customers']),
+                'avg_order_value': metrics['revenue'] / metrics['orders'] if metrics['orders'] > 0 else 0,
+                'avg_age': round(avg_age, 1),
+                'avg_satisfaction': round(avg_satisfaction, 2)
+            })
+
+        age_analysis = [{'age_group': k, 'revenue': v['revenue'], 'orders': v['orders']} for k, v in age_groups.items()]
+        
+        channels = []
+        for channel, metrics in channel_data.items():
+            cac = metrics['revenue'] / len(metrics['customers']) if metrics['customers'] else 0
+            channels.append({
+                'channel': channel,
+                'revenue': metrics['revenue'],
+                'orders': metrics['orders'],
+                'customers': len(metrics['customers']),
+                'customer_acquisition_cost': round(cac * 0.1, 2),
+                'lifetime_value': round(cac, 2)
+            })
+
+        return jsonify({'success': True, 'data': {'segments': segments, 'age_groups': age_analysis, 'acquisition_channels': channels}})
+
+    
 def create_controllers_and_routes(transactions_data):
     analytics_controller = AnalyticsController(transactions_data)
 
@@ -217,6 +287,7 @@ def create_controllers_and_routes(transactions_data):
     analytics_bp.add_url_rule('/overview', view_func=analytics_controller.get_analytics_overview)
     analytics_bp.add_url_rule('/revenue-trend', view_func=analytics_controller.get_revenue_trend)
     analytics_bp.add_url_rule('/category-performance', view_func=analytics_controller.get_category_performance)
+    analytics_bp.add_url_rule('/customer-insights', view_func=analytics_controller.get_customer_insights)
 
 
     return transactions_bp, analytics_bp
